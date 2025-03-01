@@ -4,7 +4,7 @@ env:
   imageName: "myjavaapp"
 jobs:
   CICDjobs:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - name: clone current repository
       uses: actions/checkout@v2
@@ -29,4 +29,4 @@ jobs:
         context: .
         file: Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:latest
+        tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:v1
