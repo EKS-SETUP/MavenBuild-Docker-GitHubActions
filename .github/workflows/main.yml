@@ -1,40 +1,39 @@
-name: deploy code build
-on: push
+name: Code build and Deploy 
+on: push 
 env:
-  imageName: "myjavaapp"
+ imageName: "myjavaapp"
 jobs:
-  CICDjobs:
-    runs-on: ubuntu-latest
-    steps:
-    - name: clone current repository
-      uses: actions/checkout@v2
-    - name: setup java17 and maven
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        cache: 'maven'
-    - name: build the code
-      run: mvn clean package
-    - name: install docker
-      uses: docker/setup-docker-action@v2
-    - name: login to docker hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: build and push
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        file: Dockerfile
-        push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:latest
+ CICDjob:
+  runs-on: ubuntu-latest
+  steps:
+  - name: Clone the current repository on the runner
+    uses: actions/checkout@v4
+  - name: Setup Java 17 and maven 
+    uses: actions/setup-java@v4
+    with:
+     distribution: 'temurin'
+     java-version: '17'
+     cache: 'maven'
+  - name: Build with Maven 
+    run:  mvn package
+  - name: Install docker 
+    uses: docker/setup-docker-action@v4
+  - name: Login to Docker Hub
+    uses: docker/login-action@v3
+    with:
+      username: ${{ secrets.DOCKER_USERNAME }}
+      password: ${{ secrets.DOCKER_PASSWORD }}
+  - name: Build and push
+    uses: docker/build-push-action@v6
+    with:
+     context: .
+     push: true 
+     tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:latest
  DeployJob:
-  needs: CICDjobs
+  needs: CICDjob
   runs-on: self-hosted
   steps:
-  - name: deploy docker image
+  - name: Deploy the Image 
     run: |
-     docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:latest
+     docker run -d -P ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:latest
      docker ps -a
