@@ -30,3 +30,11 @@ jobs:
         file: Dockerfile
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:latest
+DeployJob:
+ needs: CICDjobs
+ runs-on: self-hosted
+ steps:
+ - name: deploy docker image
+   run: |
+     docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/${{ env.imageName }}:latest
+     docker ps -a
